@@ -18,15 +18,19 @@ const config = require('./config/database');
 //.catch(err => console.log(err));
 
 
-// Connect To Database (OLD CODE)
-mongoose.connect(config.database, { useMongoClient: true});
+// Connect To Database 
+mongoose.connect(config.database,{
+useNewUrlParser: true, 
+useUnifiedTopology: true,
+family: 4,
+});
 // On Connection
 mongoose.connection.on('connected', () => {
-  console.log('Connected to Database '+config.database);
+console.log('Connected to Database '+config.database);
 });
 // On Error
 mongoose.connection.on('error', (err) => {
-  console.log('Database error '+err);
+console.log('Database error '+err);
 });
 
 const app = express();
@@ -34,7 +38,8 @@ const app = express();
 const users = require('./routes/users');
 
 // Port Number
-const port = process.env.PORT || 8080;
+// const port = process.env.PORT || 8080;
+const port = 3000;
 
 // CORS Middleware
 app.use(cors());
@@ -59,8 +64,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
+  res.sendFile(path.join(__dirname,'public/index.html'));
 });
+
 
 // Start Server
 app.listen(port, () => {

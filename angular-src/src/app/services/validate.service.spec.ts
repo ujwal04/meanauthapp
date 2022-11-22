@@ -1,15 +1,16 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 
 import { ValidateService } from './validate.service';
 
 describe('ValidateService', () => {
+  let service: ValidateService;
+
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [ValidateService]
-    });
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(ValidateService);
   });
 
-  it('should be created', inject([ValidateService], (service: ValidateService) => {
+  it('should be created', () => {
     expect(service).toBeTruthy();
-  }));
+  });
 });

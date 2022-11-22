@@ -1,42 +1,51 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers } from '@angular/http';
-import { HttpModule } from '@angular/http';
-import 'rxjs/add/operator/map';
-import { tokenNotExpired } from 'angular2-jwt';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import {JwtHelperService} from '@auth0/angular-jwt';
 
-@Injectable()
+
+const helper = new JwtHelperService();
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  authToken: any;
-  user: any;
+  // token: string;
+  authToken:any;
+  user:any;
+  httpClient: any;
 
-  constructor(private http: Http) {
-      this.isDev = true;  // Change to false before deployment
-      }
+
+  constructor(private http:HttpClient) { }
 
   registerUser(user) {
-    let headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    return this.http.post('users/register', user, {headers: headers})
-      .map(res => res.json());
+    // console.log(user+"user");
+    // console.log(this.authToken);
+    let headers={};
+    if(this.authToken){
+      headers = new HttpHeaders({'Authorization': this.authToken, 'Content-Type': 'application/json'});
+    }
+    return this.http.post('http://localhost:3000/users/register', user, {headers: headers})
   }
 
   authenticateUser(user) {
-    let headers = new Headers();
+    // console.log(user["username"]+"user");
+    // console.log(this.authToken);
+    let headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    return this.http.post('users/authenticate', user, {headers: headers})
-      .map(res => res.json());
+    // console.log(headers);
+
+    return this.http.post('http://localhost:3000/users/authenticate', user, {headers: headers})
   }
 
-  getProfile() {
-    let headers = new Headers();
+  getProfile(){
     this.loadToken();
-    headers.append('Authorization', this.authToken);
-    headers.append('Content-Type', 'application/json');
-    return this.http.get('users/profile', {headers: headers})
-      .map(res => res.json());
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': this.authToken
+    });
+    return this.http.get('http://localhost:3000/users/profile', {headers: headers});
   }
 
-  storeUserData(token, user) {
+  storeUserData(token, user){
     localStorage.setItem('id_token', token);
     localStorage.setItem('user', JSON.stringify(user));
     this.authToken = token;
@@ -47,14 +56,30 @@ export class AuthService {
     const token = localStorage.getItem('id_token');
     this.authToken = token;
   }
-
-  loggedIn() {
-    return tokenNotExpired('id_token');
+  // private tokenNotExpired(){
+  //   const jwtService: JwtHelperService = new JwtHelperService();
+  //   const item: string = jwtService.tokenGetter();
+  //   return item != null && !jwtService.isTokenExpired(item);
+  // }
+  isTokenExpired(){
+    const isExpired=helper.isTokenExpired(this.authToken);
+    if(isExpired==true){
+      // console.log(true);
+      return true;
+    }else{
+      // console.log(false);
+      return false;
+    }
   }
-
+  loggedIn() {
+    if(this.isTokenExpired()==false){
+      return true;
+    }
+  }
   logout() {
     this.authToken = null;
     this.user = null;
     localStorage.clear();
   }
+
 }
